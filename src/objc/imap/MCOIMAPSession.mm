@@ -98,6 +98,10 @@ MCO_OBJC_SYNTHESIZE_SCALAR(unsigned int, unsigned int, setPort, port)
 MCO_OBJC_SYNTHESIZE_STRING(setUsername, username)
 MCO_OBJC_SYNTHESIZE_STRING(setPassword, password)
 MCO_OBJC_SYNTHESIZE_STRING(setOAuth2Token, OAuth2Token)
+MCO_OBJC_SYNTHESIZE_STRING(setClientCertificate, clientCertificate)
+MCO_OBJC_SYNTHESIZE_DATA(setClientX509Der, clientX509Der)
+MCO_OBJC_SYNTHESIZE_DATA(setClientPKeyDer, clientPKeyDer)
+
 MCO_OBJC_SYNTHESIZE_SCALAR(MCOAuthType, mailcore::AuthType, setAuthType, authType)
 MCO_OBJC_SYNTHESIZE_SCALAR(MCOConnectionType, mailcore::ConnectionType, setConnectionType, connectionType)
 MCO_OBJC_SYNTHESIZE_SCALAR(NSTimeInterval, time_t, setTimeout, timeout)
@@ -172,6 +176,7 @@ MCO_OBJC_SYNTHESIZE_SCALAR(dispatch_queue_t, dispatch_queue_t, setDispatchQueue,
 {
     MCO_NATIVE_INSTANCE->cancelAllOperations();
 }
+
 
 #pragma mark - Operations
 

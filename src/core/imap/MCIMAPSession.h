@@ -44,6 +44,15 @@ namespace mailcore {
         virtual void setOAuth2Token(String * token);
         virtual String * OAuth2Token();
         
+        virtual void setClientCertificate(String * path);
+        virtual String * clientCertificate();
+        
+        virtual void setClientX509Der(Data * x509);
+        virtual Data * clientX509Der();
+        
+        virtual void setClientPKeyDer(Data * pkey);
+        virtual Data * clientPKeyDer();
+        
         virtual void setAuthType(AuthType authType);
         virtual AuthType authType();
         
@@ -217,6 +226,12 @@ namespace mailcore {
         String * mUsername;
         String * mPassword;
         String * mOAuth2Token;
+        
+        Data * mClientX509Der;
+        Data * mClientPKeyDer;
+        String * mClientCertificate;
+        
+//        void (* mClientCertificateCallback)(char ** x509_der, size_t * x509_len, char ** pkey_der, size_t * pkey_len);
         AuthType mAuthType;
         ConnectionType mConnectionType;
         bool mCheckCertificateEnabled;

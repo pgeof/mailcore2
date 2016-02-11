@@ -312,6 +312,9 @@ void IMAPSession::init()
     mUsername = NULL;
     mPassword = NULL;
     mOAuth2Token = NULL;
+    mClientCertificate = NULL;
+    mClientX509Der = NULL;
+    mClientPKeyDer = NULL;
     mAuthType = AuthTypeSASLNone;
     mConnectionType = ConnectionTypeClear;
     mCheckCertificateEnabled = true;
@@ -427,6 +430,35 @@ String * IMAPSession::OAuth2Token()
     return mOAuth2Token;
 }
 
+void IMAPSession::setClientCertificate(String * path)
+{
+    MC_SAFE_REPLACE_COPY(String, mClientCertificate, path);
+}
+
+String * IMAPSession::clientCertificate()
+{
+    return mClientCertificate;
+}
+
+void IMAPSession::setClientX509Der(Data * x509)
+{
+    MC_SAFE_REPLACE_COPY(Data, mClientX509Der, x509);
+}
+
+Data * IMAPSession::clientX509Der()
+{
+    return mClientX509Der;
+}
+
+void IMAPSession::setClientPKeyDer(Data * pkey) {
+    MC_SAFE_REPLACE_COPY(Data, mClientPKeyDer, pkey);
+}
+
+Data * IMAPSession::clientPKeyDer() {
+    return mClientPKeyDer;
+}
+
+
 void IMAPSession::setAuthType(AuthType authType)
 {
     mAuthType = authType;
@@ -534,7 +566,7 @@ void IMAPSession::setup()
     
     mImap = mailimap_new(0, NULL);
     mailimap_set_timeout(mImap, timeout());
-    mailimap_set_progress_callback(mImap, body_progress, IMAPSession::items_progress, this);
+    mailimap_set_progress_callback(mImap, body_progress, items_progress, this);
     mailimap_set_logger(mImap, logger, this);
 }
 
@@ -558,6 +590,68 @@ void IMAPSession::unsetup()
     }
     
     mState = STATE_DISCONNECTED;
+}
+
+//static size_t read_file(char *fpath, unsigned char **out) {
+//    FILE *fp;
+//    long lSize;
+//    unsigned char *buffer;
+//    
+//    fp = fopen ( fpath , "rb" );
+//    if( !fp ) perror(fpath),exit(1);
+//    
+//    fseek( fp , 0L , SEEK_END);
+//    lSize = ftell( fp );
+//    rewind( fp );
+//    
+//    /* allocate memory for entire content */
+//    buffer = (unsigned char*)calloc( 1, lSize+1 );
+//    if( !buffer ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
+//    
+//    /* copy the file into the buffer */
+//    if( 1!=fread( buffer , lSize, 1 , fp) )
+//        fclose(fp),free(buffer),fputs("entire read fails",stderr),exit(1);
+//    
+//    /* do your work here, buffer is a string contains the whole text */
+//    
+//    fclose(fp);
+//    
+//    if (out != NULL) {
+//        *out = (unsigned char*)calloc(1, lSize+1);
+//        memcpy(*out, buffer, lSize+1);
+//    }
+//    free(buffer);
+//    return lSize;
+//    
+//    //  return buffer;
+//}
+
+
+static void certificateclient_callback(struct mailstream_ssl_context * ssl_context, void * data)
+{
+    IMAPSession * session = (IMAPSession *) data;
+//    char * path = (char *)MCUTF8(session->clientCertificate());
+//    size_t path_len = strlen(path);
+//
+//    const char * cert_suffix = "-cert.der";
+//    char * cert_path = (char *)calloc(1, path_len+strlen(cert_suffix)+1);
+//    strcpy(cert_path, path), strcat(cert_path, cert_suffix);
+//    unsigned char * cert = NULL;
+//    size_t cert_len = read_file(cert_path, &cert);
+//
+//    const char * key_suffix = "-key.der";
+//    char * key_path = (char *)calloc(1, path_len+strlen(key_suffix)+1);
+//    strcpy(key_path, path), strcat(key_path, key_suffix);
+//    unsigned char * key = NULL;
+//    size_t key_len = read_file(key_path, &key);
+    
+    unsigned char * cert = (unsigned char *)session->clientX509Der()->bytes();
+    unsigned char * key = (unsigned char *)session->clientPKeyDer()->bytes();
+    size_t cert_len = session->clientX509Der()->length();
+    size_t key_len = session->clientPKeyDer()->length();
+    mailstream_ssl_set_client_certificate_data(ssl_context, cert, cert_len);
+    mailstream_ssl_set_client_private_key_data(ssl_context, key, key_len);
+//    mailstream_ssl_set_client_certicate(ssl_context, (char *)MCUTF8(session->clientCertificate()));
 }
 
 void IMAPSession::connect(ErrorCode * pError)
@@ -588,7 +682,12 @@ void IMAPSession::connect(ErrorCode * pError)
         break;
 
         case ConnectionTypeTLS:
-        r = mailimap_ssl_connect_voip(mImap, MCUTF8(mHostname), mPort, isVoIPEnabled());
+        if (clientX509Der() != NULL && clientPKeyDer()) {
+            r = mailimap_ssl_connect_voip_with_callback(mImap, MCUTF8(mHostname), mPort, isVoIPEnabled(), certificateclient_callback, this);
+        }
+        else {
+            r = mailimap_ssl_connect_voip(mImap, MCUTF8(mHostname), mPort, isVoIPEnabled());
+        }
         MCLog("ssl connect %s %u %u", MCUTF8(mHostname), mPort, r);
         if (hasError(r)) {
             MCLog("connect error %i", r);

@@ -176,6 +176,33 @@ String * IMAPAsyncConnection::OAuth2Token()
     return mSession->OAuth2Token();
 }
 
+void IMAPAsyncConnection::setClientCertificate(String * path)
+{
+    mSession->setClientCertificate(path);
+}
+
+String * IMAPAsyncConnection::clientCertificate() {
+    return mSession->clientCertificate();
+}
+
+void IMAPAsyncConnection::setClientX509Der(Data * x509)
+{
+    mSession->setClientX509Der(x509);
+}
+
+Data * IMAPAsyncConnection::clientX509Der() {
+    return mSession->clientX509Der();
+}
+
+void IMAPAsyncConnection::setClientPKeyDer(Data * pkey)
+{
+    mSession->setClientPKeyDer(pkey);
+}
+
+Data * IMAPAsyncConnection::clientPKeyDer() {
+    return mSession->clientPKeyDer();
+}
+
 void IMAPAsyncConnection::setAuthType(AuthType authType)
 {
     mSession->setAuthType(authType);

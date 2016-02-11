@@ -59,6 +59,9 @@ IMAPAsyncSession::IMAPAsyncSession()
     mUsername = NULL;
     mPassword = NULL;
     mOAuth2Token = NULL;
+    mClientCertificate = NULL;
+    mClientX509Der = NULL;
+    mClientPKeyDer = NULL;
     mAuthType = AuthTypeSASLNone;
     mConnectionType = ConnectionTypeClear;
     mCheckCertificateEnabled = true;
@@ -92,6 +95,9 @@ IMAPAsyncSession::~IMAPAsyncSession()
     MC_SAFE_RELEASE(mUsername);
     MC_SAFE_RELEASE(mPassword);
     MC_SAFE_RELEASE(mOAuth2Token);
+    MC_SAFE_RELEASE(mClientCertificate);
+    MC_SAFE_RELEASE(mClientX509Der);
+    MC_SAFE_RELEASE(mClientPKeyDer);
     MC_SAFE_RELEASE(mDefaultNamespace);
 }
 
@@ -143,6 +149,36 @@ void IMAPAsyncSession::setOAuth2Token(String * token)
 String * IMAPAsyncSession::OAuth2Token()
 {
     return mOAuth2Token;
+}
+
+void IMAPAsyncSession::setClientCertificate(String * path)
+{
+    MC_SAFE_REPLACE_COPY(String, mClientCertificate, path);
+}
+
+String * IMAPAsyncSession::clientCertificate()
+{
+    return mClientCertificate;
+}
+
+void IMAPAsyncSession::setClientX509Der(Data * x509)
+{
+    MC_SAFE_REPLACE_COPY(Data, mClientX509Der, x509);
+}
+
+Data * IMAPAsyncSession::clientX509Der()
+{
+    return mClientX509Der;
+}
+
+void IMAPAsyncSession::setClientPKeyDer(Data * pkey)
+{
+    MC_SAFE_REPLACE_COPY(Data, mClientPKeyDer, pkey);
+}
+
+Data * IMAPAsyncSession::clientPKeyDer()
+{
+    return mClientPKeyDer;
 }
 
 void IMAPAsyncSession::setAuthType(AuthType authType)
@@ -252,6 +288,9 @@ IMAPAsyncConnection * IMAPAsyncSession::session()
     session->setUsername(mUsername);
     session->setPassword(mPassword);
     session->setOAuth2Token(mOAuth2Token);
+    session->setClientCertificate(mClientCertificate);
+    session->setClientX509Der(mClientX509Der);
+    session->setClientPKeyDer(mClientPKeyDer);
     session->setAuthType(mAuthType);
     session->setConnectionType(mConnectionType);
     session->setTimeout(mTimeout);
