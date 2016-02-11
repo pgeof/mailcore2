@@ -42,6 +42,12 @@
 /** This is the OAuth2 token. */
 @property (nonatomic, copy) NSString *OAuth2Token;
 
+/** This is the client public certificate data in DER format */
+@property (nonatomic, copy) NSData *clientX509Der;
+
+/** This is the client private key certificate data in DER format (the key shouldn't be protected by a password */
+@property (nonatomic, copy) NSData *clientPKeyDer;
+
 /** 
  This is the authentication type to use to connect.
  `MCOAuthTypeSASLNone` means that it uses the clear-text is used (and is the default).

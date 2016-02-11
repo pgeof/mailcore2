@@ -28,6 +28,8 @@ void SMTPSession::init()
     mUsername = NULL;
     mPassword = NULL;
     mOAuth2Token = NULL;
+    mClientX509Der = NULL;
+    mClientPKeyDer = NULL;
     mAuthType = AuthTypeSASLNone;
     mConnectionType = ConnectionTypeClear;
     mTimeout = 30;
@@ -56,6 +58,8 @@ SMTPSession::~SMTPSession()
     MC_SAFE_RELEASE(mUsername);
     MC_SAFE_RELEASE(mPassword);
     MC_SAFE_RELEASE(mOAuth2Token);
+    MC_SAFE_RELEASE(mClientX509Der);
+    MC_SAFE_RELEASE(mClientPKeyDer);
 }
 
 void SMTPSession::setHostname(String * hostname)
@@ -106,6 +110,26 @@ void SMTPSession::setOAuth2Token(String * token)
 String * SMTPSession::OAuth2Token()
 {
     return mOAuth2Token;
+}
+
+void SMTPSession::setClientX509Der(Data * x509)
+{
+    MC_SAFE_REPLACE_COPY(Data, mClientX509Der, x509);
+}
+
+Data * SMTPSession::clientX509Der()
+{
+    return mClientX509Der;
+}
+
+void SMTPSession::setClientPKeyDer(Data * pkey)
+{
+    MC_SAFE_REPLACE_COPY(Data, mClientPKeyDer, pkey);
+}
+
+Data * SMTPSession::clientPKeyDer()
+{
+    return mClientPKeyDer;
 }
 
 void SMTPSession::setAuthType(AuthType authType)
@@ -240,6 +264,18 @@ void SMTPSession::connectIfNeeded(ErrorCode * pError)
     }
 }
 
+static void certificateclient_callback(struct mailstream_ssl_context * ssl_context, void * data)
+{
+    SMTPSession * session = (SMTPSession *) data;
+    unsigned char * cert = (unsigned char *)session->clientX509Der()->bytes();
+    unsigned char * key = (unsigned char *)session->clientPKeyDer()->bytes();
+    size_t cert_len = session->clientX509Der()->length();
+    size_t key_len = session->clientPKeyDer()->length();
+    mailstream_ssl_set_client_certificate_data(ssl_context, cert, cert_len);
+    mailstream_ssl_set_client_private_key_data(ssl_context, key, key_len);
+
+}
+
 void SMTPSession::connect(ErrorCode * pError)
 {
     int r;
@@ -300,7 +336,12 @@ void SMTPSession::connect(ErrorCode * pError)
             break;
             
         case ConnectionTypeTLS:
-            r = mailsmtp_ssl_connect(mSmtp, MCUTF8(mHostname), port());
+            if (clientX509Der() != NULL && clientPKeyDer() != NULL) {
+                r = mailsmtp_ssl_connect_with_callback(mSmtp, MCUTF8(mHostname), port(), certificateclient_callback, this);
+            }
+            else {
+                r = mailsmtp_ssl_connect(mSmtp, MCUTF8(mHostname), port());
+            }
             if (r != MAILSMTP_NO_ERROR) {
                 * pError = ErrorConnection;
                 goto close;

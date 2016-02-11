@@ -36,6 +36,12 @@ namespace mailcore {
         virtual void setOAuth2Token(String * token);
         virtual String * OAuth2Token();
         
+        virtual void setClientX509Der(Data * token);
+        virtual Data * clientX509Der();
+        
+        virtual void setClientPKeyDer(Data * token);
+        virtual Data * clientPKeyDer();
+        
         virtual void setAuthType(AuthType authType);
         virtual AuthType authType();
         

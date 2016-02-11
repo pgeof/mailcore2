@@ -134,6 +134,26 @@ String * SMTPAsyncSession::OAuth2Token()
     return mSession->OAuth2Token();
 }
 
+void SMTPAsyncSession::setClientX509Der(Data * x509)
+{
+    mSession->setClientX509Der(x509);
+}
+
+Data * SMTPAsyncSession::clientX509Der()
+{
+    return mSession->clientX509Der();
+}
+
+void SMTPAsyncSession::setClientPKeyDer(Data * pkey)
+{
+    mSession->setClientPKeyDer(pkey);
+}
+
+Data * SMTPAsyncSession::clientPKeyDer()
+{
+    return mSession->clientPKeyDer();
+}
+
 void SMTPAsyncSession::setAuthType(AuthType authType)
 {
     mSession->setAuthType(authType);
