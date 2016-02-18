@@ -47,3 +47,5 @@ build-windows/mailcore2/test/Release
 build-windows/mailcore2/test/x64/Release
 build-windows/mailcore2/test/Debug
 build-windows/mailcore2/test/x64/Debug
+Carthage
+Cartfile.resolved
