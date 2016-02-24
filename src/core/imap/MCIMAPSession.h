@@ -74,7 +74,8 @@ namespace mailcore {
         
         virtual IMAPIdentity * serverIdentity();
         virtual IMAPIdentity * clientIdentity();
-        
+        virtual void setClientIdentity(IMAPIdentity * identity);
+
         virtual void select(String * folder, ErrorCode * pError);
         virtual IMAPFolderStatus * folderStatus(String * folder, ErrorCode * pError);
         
@@ -94,10 +95,15 @@ namespace mailcore {
                                    IMAPProgressCallback * progressCallback, uint32_t * createdUID, ErrorCode * pError);
         virtual void appendMessageWithCustomFlagsAndDate(String * folder, Data * messageData, MessageFlag flags, Array * customFlags, time_t date,
                                                          IMAPProgressCallback * progressCallback, uint32_t * createdUID, ErrorCode * pError);
-        
+        virtual void appendMessageWithCustomFlagsAndDate(String * folder, String * messagePath, MessageFlag flags, Array * customFlags, time_t date,
+                                                         IMAPProgressCallback * progressCallback, uint32_t * createdUID, ErrorCode * pError);
+
         virtual void copyMessages(String * folder, IndexSet * uidSet, String * destFolder,
                                   HashMap ** pUidMapping, ErrorCode * pError);
         
+        virtual void moveMessages(String * folder, IndexSet * uidSet, String * destFolder,
+                                  HashMap ** pUidMapping, ErrorCode * pError);
+
         virtual void expunge(String * folder, ErrorCode * pError);
         
         virtual Array * /* IMAPMessage */ fetchMessagesByUID(String * folder, IMAPMessagesRequestKind requestKind,
@@ -185,7 +191,7 @@ namespace mailcore {
         virtual bool isXOAuthEnabled();
         virtual bool isNamespaceEnabled();
         virtual bool isCompressionEnabled();
-        virtual bool allowsNewPermanentFlags(); 
+        virtual bool allowsNewPermanentFlags();
       
         virtual String * gmailUserDisplayName() DEPRECATED_ATTRIBUTE;
         
@@ -219,6 +225,7 @@ namespace mailcore {
         virtual bool isAutomaticConfigurationDone();
         virtual void resetAutomaticConfigurationDone();
         virtual void applyCapabilities(IndexSet * capabilities);
+        virtual IndexSet * storedCapabilities();
         
     private:
         String * mHostname;

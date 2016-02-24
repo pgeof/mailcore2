@@ -126,6 +126,11 @@ MCO_OBJC_SYNTHESIZE_SCALAR(dispatch_queue_t, dispatch_queue_t, setDispatchQueue,
     return MCO_OBJC_BRIDGE_GET(clientIdentity);
 }
 
+- (void) setClientIdentity:(MCOIMAPIdentity *)clientIdentity
+{
+    MCO_OBJC_BRIDGE_SET(setClientIdentity, IMAPIdentity, clientIdentity);
+}
+
 - (MCOIMAPIdentity *) serverIdentity
 {
     return MCO_OBJC_BRIDGE_GET(serverIdentity);
@@ -269,6 +274,18 @@ MCO_OBJC_SYNTHESIZE_SCALAR(dispatch_queue_t, dispatch_queue_t, setDispatchQueue,
     return MCO_TO_OBJC_OP(coreOp);
 }
 
+- (MCOIMAPAppendMessageOperation *)appendMessageOperationWithFolder:(NSString *)folder
+                                                     contentsAtPath:(NSString *)path
+                                                              flags:(MCOMessageFlag)flags
+                                                        customFlags:(NSArray *)customFlags
+{
+    IMAPAppendMessageOperation * coreOp = MCO_NATIVE_INSTANCE->appendMessageOperation([folder mco_mcString],
+                                                                                      MCO_FROM_OBJC(String, path),
+                                                                                      (MessageFlag) flags,
+                                                                                      MCO_FROM_OBJC(Array, customFlags));
+    return MCO_TO_OBJC_OP(coreOp);
+}
+
 - (MCOIMAPCopyMessagesOperation *)copyMessagesOperationWithFolder:(NSString *)folder
                                                              uids:(MCOIndexSet *)uids
                                                        destFolder:(NSString *)destFolder
@@ -279,6 +296,15 @@ MCO_OBJC_SYNTHESIZE_SCALAR(dispatch_queue_t, dispatch_queue_t, setDispatchQueue,
     return MCO_TO_OBJC_OP(coreOp);
 }
 
+- (MCOIMAPMoveMessagesOperation *)moveMessagesOperationWithFolder:(NSString *)folder
+                                                             uids:(MCOIndexSet *)uids
+                                                       destFolder:(NSString *)destFolder
+{
+    IMAPMoveMessagesOperation * coreOp = MCO_NATIVE_INSTANCE->moveMessagesOperation([folder mco_mcString],
+                                                                                    MCO_FROM_OBJC(IndexSet, uids),
+                                                                                    [destFolder mco_mcString]);
+    return MCO_TO_OBJC_OP(coreOp);
+}
 
 - (MCOIMAPOperation *) expungeOperation:(NSString *)folder
 {
